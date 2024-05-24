@@ -1,18 +1,28 @@
 import vertica_python
 
-conn_info = {'host': '# Адрес сервера из инструкции', 
-             'port': '# Порт из инструкции',
-             'user': '# Полученный логин',       
-             'password': '# Пароль',
+conn_info = {'host': 'vertica.tgcloudenv.ru', 
+             'port': '5433',
+             'user': 'stv2024050741',       
+             'password': 'iwbpVXz59UhI5F9',
              'database': 'dwh',
              # Вначале он нам понадобится, а дальше — решите позже сами
             'autocommit': True
 }
 
-def try_select(conn_info=conn_info):
-	# И рекомендуем использовать соединение вот так
-	with vertica_python.connect(**conn_info) as conn:
-		# Select 1 — ваш код здесь; 
 
-		res = cur.fetchall()
-		return res
+N = 10000
+batch = 5
+
+with vertica_python.connect(**conn_info) as conn:
+    curs = conn.cursor()
+    insert_stmt = 'INSERT INTO BAD_IDEA VALUES ({},\'a\');'
+    
+    for i in range(0, N, batch):
+        # будем отправлять сразу по несколько команд
+        curs.execute(
+            '\n'.join(
+                [insert_stmt.format(i + j) for j in range(batch)])
+        )
+        
+    curs.commit()
+            
